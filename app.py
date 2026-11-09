@@ -349,7 +349,7 @@ _DEVICES = [
 ]
 
 # Penandatangan di bawah form QC (sesuai Excel): (judul kolom, nama, jabatan). Tanda tangan dibiarkan kosong untuk ditandatangani basah.
-SIGNERS = [("Disiapkan Oleh", "Rheinner Nicholaus, Amd. Rad", "PIC. Fasilitas"),
+SIGNERS = [("Disiapkan Oleh", "Herdani Rahman, S.Si", "Fisikawan Medik"),
            ("Mengetahui", "Joko Harjanto S.Tr.Rad", "Koordinator Radiologi"),
            ("Mengetahui", "dr Christopher Silman Sp.Rad, Ph.D", "Ho. Dept Radiologi")]
 
