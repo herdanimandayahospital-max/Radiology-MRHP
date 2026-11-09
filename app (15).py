@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-PHT-Tracker - Mandaya Royal Hospital Puri | Departemen Radiologi
+Pemantapan Mutu Internal (PMI) by Radiology Departmen MRHP - Mandaya Royal Hospital Puri
   1) Form Digital Monitoring Suhu dan Kelembapan   (grafik titik SUHU & KELEMBAPAN per ruangan, 3 shift P/S/M)
   2) Form Digital Daily Quality Control            (daftar periksa harian per modalitas: KEGIATAN + PARAMETER)
 """
@@ -31,7 +31,7 @@ except Exception:
     pass
 
 st.set_page_config(
-    page_title="PHT-Tracker",
+    page_title="Pemantapan Mutu Internal (PMI) by Radiology Departmen MRHP",
     page_icon="🏥",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -41,7 +41,8 @@ st.set_page_config(
 # =====================================================================
 # 0. KONFIGURASI UTAMA (aman diubah)
 # =====================================================================
-APP_TITLE = "PHT-Tracker"
+APP_TITLE = "Pemantapan Mutu Internal (PMI)"
+APP_BY = "by Radiology Departmen MRHP"
 HOSPITAL = "Mandaya Royal Hospital Puri"
 SITE = "PURI"
 DEPT_LINE = "DEPARTEMEN RADIOLOGI MANDAYA ROYAL HOSPITAL PURI"
@@ -364,7 +365,7 @@ def staff_label(ini):
 
 DEFAULT_CFG = {
     "rooms": [dict(nama=n, tekanan=False, t_lo=SUHU_NORMAL[0], t_hi=SUHU_NORMAL[1], h_lo=HUM_NORMAL[0], h_hi=HUM_NORMAL[1]) for n in _ROOMS],
-    "staff": ["AG", "BA", "DT", "HR", "JK", "NA", "ND", "PR", "RH", "SS", "WN"],
+    "staff": ["JK", "RN", "ND", "BA", "DT", "WN", "NA", "SS", "PR", "AR", "AG", "SN", "PP", "RK", "LD", "RR", "FH", "HR", "VR", "AL", "WF", "EK"],   # petugas Radiologi yang bertugas (ubah lewat sidebar Author)
     "devices": _DEVICES,
 }
 
@@ -1518,6 +1519,11 @@ html, body, [class*="css"], .stApp, .stMarkdown, .stButton, .stTextInput,
     font-family: 'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
     color-scheme: light !important;
 }
+button, input, textarea, select, code, pre, kbd, label, p, li, td, th, h1, h2, h3, h4, h5, h6,
+[data-baseweb], [data-testid="stMarkdownContainer"] *, [data-testid="stDataFrame"], [data-testid="stTable"] *, [data-testid="stMetric"] *{
+    font-family: 'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+[data-testid="stIconMaterial"], .material-icons, .material-symbols-rounded{font-family:'Material Symbols Rounded' !important}
 .stApp{background:#ffffff !important;color:var(--ink)}
 .stApp h1,.stApp h2,.stApp h3,.stApp h4{color:var(--navy) !important;font-weight:700;letter-spacing:.2px}
 .stApp [data-testid="stWidgetLabel"] *{color:var(--ink) !important;font-weight:500}
@@ -1713,12 +1719,12 @@ def header(compact=False):
     """Header dashboard: latar biru Mandaya, logo di kapsul putih, teks putih."""
     wm = _brand_html(small=compact)
     if compact:   # versi ringkas untuk halaman QR (layar HP)
-        st.markdown("<div class='hero-c'>{}<div><div class='ttl'>{}</div><div class='sub'>Suhu &middot; Kelembapan &middot; Daily QC &middot; {}</div></div></div>".format(
-            wm, escape(APP_TITLE), escape(SITE.title())), unsafe_allow_html=True)
+        st.markdown("<div class='hero-c'>{}<div><div class='ttl'>{}</div><div class='sub'>{} &middot; Suhu &middot; Kelembapan &middot; Daily QC</div></div></div>".format(
+            wm, escape(APP_TITLE), escape(APP_BY)), unsafe_allow_html=True)
         return
     st.markdown("<div class='hero'><span class='blob b1'></span><span class='blob b2'></span><div class='top'>{}<div class='hfy'>Departemen Radiologi</div></div>"
-                "<div class='ttl'>{}</div><div class='sub'>Monitoring Suhu &amp; Kelembapan &middot; Daily Quality Control</div>"
-                "<div class='code'>{}</div></div>".format(wm, escape(APP_TITLE), escape(HOSPITAL)), unsafe_allow_html=True)
+                "<div class='ttl'>{}</div><div class='sub'>{} &middot; Monitoring Suhu &amp; Kelembapan &middot; Daily Quality Control</div>"
+                "<div class='code'>{}</div></div>".format(wm, escape(APP_TITLE), escape(APP_BY), escape(HOSPITAL)), unsafe_allow_html=True)
 
 
 def month_year_bar(prefix, cols=(1.6, 1)):
