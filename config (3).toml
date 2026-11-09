@@ -1,0 +1,43 @@
+[server]
+enableStaticServing = true
+
+[theme]
+base = "light"
+primaryColor = "#073763"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f2f7fc"
+textColor = "#073763"
+font = "Lexend"
+headingFont = "Lexend"
+codeFont = "Lexend"
+
+# Font Lexend dibaca dari folder "static/" di repo (salin semua file Lexend-*.ttf ke sana).
+[[theme.fontFaces]]
+family = "Lexend"
+url = "app/static/Lexend-Light.ttf"
+weight = 300
+
+[[theme.fontFaces]]
+family = "Lexend"
+url = "app/static/Lexend-Regular.ttf"
+weight = 400
+
+[[theme.fontFaces]]
+family = "Lexend"
+url = "app/static/Lexend-Medium.ttf"
+weight = 500
+
+[[theme.fontFaces]]
+family = "Lexend"
+url = "app/static/Lexend-SemiBold.ttf"
+weight = 600
+
+[[theme.fontFaces]]
+family = "Lexend"
+url = "app/static/Lexend-Bold.ttf"
+weight = 700
+
+[[theme.fontFaces]]
+family = "Lexend"
+url = "app/static/Lexend-ExtraBold.ttf"
+weight = 800
