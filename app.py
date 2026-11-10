@@ -99,7 +99,22 @@ SHIFT_TIMES = " · ".join("{:02d}.00".format(SHIFT_HOUR[k]) for k in "PSM")
 
 # Ruangan untuk form suhu & kelembapan (nama persis seperti kolom "RUANG :" di form).
 _ROOMS = ["Digital Diagnost C50", "Combi Diagnost R90", "Amulet Innovality", "USG Philips Affiniti 70",
-          "Iqon Spectral CT", "R. Teknik CT Scan", "MRI Ambition X", "R. Teknik MRI", "Lemari ALKES", "Lemari CD"]
+          "Iqon Spectral CT", "R. Teknik CT Scan", "MRI Ambition X", "R. Teknik MRI", "Lemari ALKES", "Lemari CD",
+          "C-arm GE dan Philips (OT)", "Dental Panoramik dan Intraoral", "Cathlab Azurion"]
+
+# Staff (inisial) khusus per ruang. Ruang yang tidak ada di sini memakai daftar staff umum (cfg["staff"]).
+ROOM_STAFF = {
+    "C-arm GE dan Philips (OT)": ["AP", "BP", "FC", "RJ", "AI"],
+    "Dental Panoramik dan Intraoral": ["SM", "RA"],
+    "Cathlab Azurion": ["GS", "SM", "BJ"],
+}
+
+
+def _default_room(n):
+    r = dict(nama=n, tekanan=False, t_lo=SUHU_NORMAL[0], t_hi=SUHU_NORMAL[1], h_lo=HUM_NORMAL[0], h_hi=HUM_NORMAL[1])
+    if n in ROOM_STAFF:
+        r["staff"] = list(ROOM_STAFF[n])
+    return r
 
 
 def _dev(modalitas, sections, ruang=None, qr_ruang=None):
@@ -365,6 +380,101 @@ _DEVICES = [
             ("Kelengkapan jumlah gelang smart lock", "Satu changing room memiliki 4 buah smart lock loker"),
         ]),
     ]),
+    # =================== MODALITAS BARU (DRAFT daftar periksa; ganti dengan form resmi bila sudah ada) ===================
+    # --- C-arm GE & Philips (kamar operasi / OT) ---
+    _dev("C-arm GE dan Philips", ruang="C-arm GE dan Philips (OT)", sections=[
+        ("Pengecekan C-arm GE", [
+            ("Pesawat ON", "Lampu indikator menyala dan tidak terdapat notifikasi error"),
+            ("Monitor & workstation ON", "Menyala dan booting dalam waktu wajar"),
+            ("Cek parameter kV & mA", "Display muncul"),
+            ("Cek kolimator / diafragma", "Dapat dibuka-tutup"),
+            ("Cek pergerakan C-arm (orbital, vertikal, horizontal)", "Dapat digerakkan dengan mulus"),
+            ("Cek rem / kunci roda", "Dapat terkunci dengan baik"),
+            ("Cek footswitch / hand switch & kabel", "Berfungsi dan tidak terdapat kerusakan"),
+            ("Lakukan eksposi / fluoroskopi", "Gambar muncul tanpa error dan noise"),
+        ]),
+        ("Pengecekan C-arm Philips", [
+            ("Pesawat ON", "Lampu indikator menyala dan tidak terdapat notifikasi error"),
+            ("Monitor & workstation ON", "Menyala dan booting dalam waktu wajar"),
+            ("Cek parameter kV & mA", "Display muncul"),
+            ("Cek kolimator / diafragma", "Dapat dibuka-tutup"),
+            ("Cek pergerakan C-arm (orbital, vertikal, horizontal)", "Dapat digerakkan dengan mulus"),
+            ("Cek rem / kunci roda", "Dapat terkunci dengan baik"),
+            ("Cek footswitch / hand switch & kabel", "Berfungsi dan tidak terdapat kerusakan"),
+            ("Lakukan eksposi / fluoroskopi", "Gambar muncul tanpa error dan noise"),
+        ]),
+        ("Kondisi Ruangan", [
+            ("Kebersihan alat dan ruangan", "Tidak terlihat sampah, debu & noda"),
+            ("Kelengkapan proteksi radiasi (apron, thyroid shield)", "Tersedia secara lengkap"),
+            ("Suhu ruangan", "18 - 22 C"),
+            ("Kelembapan Udara", "40 - 60 %"),
+        ]),
+        ("Mematikan Pesawat", [
+            ("Turunkan semua parameter kV & mA", ""),
+            ("Posisikan C-arm di tempat penyimpanan", "Roda terkunci"),
+            ("Tekan tombol off dan matikan panel listrik", "Kabel power digulung dan disimpan"),
+        ]),
+    ]),
+    # --- Dental Panoramik & Intraoral ---
+    _dev("Dental Panoramik dan Intraoral", ruang="Dental Panoramik dan Intraoral", sections=[
+        ("Pengecekan Dental Panoramik", [
+            ("Pesawat ON", "Lampu indikator menyala dan tidak terdapat notifikasi error"),
+            ("Cek chin rest, bite block & handgrip", "Terpasang, bersih dan tidak rusak"),
+            ("Cek pergerakan rotasi", "Bergerak dengan mulus"),
+            ("Cek lampu penanda posisi (laser beam)", "Menyala"),
+            ("Cek tombol ekspose & emergency", "Berfungsi"),
+            ("Lakukan eksposi", "Gambar muncul tanpa error dan noise"),
+        ]),
+        ("Pengecekan Dental Intraoral", [
+            ("Pesawat ON", "Lampu indikator menyala dan tidak terdapat notifikasi error"),
+            ("Cek lengan penyangga & tube head", "Stabil, tidak turun sendiri"),
+            ("Cek parameter / timer ekspose", "Display muncul"),
+            ("Cek tombol / hand switch ekspose", "Berfungsi"),
+            ("Cek sensor / imaging plate", "Tersedia, bersih dan tidak rusak"),
+            ("Lakukan eksposi", "Gambar muncul tanpa error dan noise"),
+        ]),
+        ("Kondisi Ruangan", [
+            ("Kebersihan ruangan", "Tidak terlihat sampah"),
+            ("Kebersihan meja kontrol & meja komputer", "Tidak berdebu & bernoda"),
+            ("Kelengkapan proteksi radiasi (apron)", "Tersedia dan tidak rusak"),
+            ("Suhu ruangan", "18 - 22 C"),
+            ("Kelembapan Udara", "40 - 60 %"),
+        ]),
+        ("Mematikan Pesawat", [
+            ("Turunkan semua parameter", ""),
+            ("Tekan tombol off pada pesawat Panoramik & Intraoral", ""),
+            ("Matikan panel listrik", ""),
+        ]),
+    ]),
+    # --- Cathlab Philips Azurion ---
+    _dev("Cathlab Azurion", ruang="Cathlab Azurion", sections=[
+        ("Cek Pesawat", [
+            ("Sistem Azurion ON", "Sistem menyala tanpa notifikasi error"),
+            ("Monitor ruang tindakan & ruang kontrol", "Menyala dan berfungsi"),
+            ("Cek pergerakan C-arm stand", "Dapat digerakkan dengan mulus"),
+            ("Cek pergerakan meja pasien", "Dapat bergerak ke seluruh arah"),
+            ("Cek detektor & kolimator", "Tidak terdapat notifikasi error"),
+            ("Cek footswitch / tableside control", "Berfungsi"),
+            ("Cek injektor", "Terhubung tanpa notifikasi error"),
+            ("Cek emergency stop & collision protection", "Berfungsi"),
+        ]),
+        ("Warming Up Pesawat", [
+            ("Sistem ON 10 menit", "Pastikan tidak ada notifikasi error"),
+            ("Lakukan fluoroskopi / ekspose", "Gambar muncul tanpa error dan noise"),
+        ]),
+        ("Kondisi Ruangan", [
+            ("Kebersihan ruangan", "Tidak terlihat sampah"),
+            ("Kebersihan meja kontrol & meja komputer", "Tidak berdebu & bernoda"),
+            ("Kelengkapan proteksi radiasi (apron, ceiling shield)", "Tersedia secara lengkap"),
+            ("Suhu ruangan", "18 - 22 C"),
+            ("Kelembapan Udara", "40 - 60 %"),
+        ]),
+        ("Mematikan Pesawat", [
+            ("Turunkan semua parameter", ""),
+            ("Posisikan C-arm stand di posisi parkir", ""),
+            ("Matikan sistem Azurion (shutdown)", "Pilih menu shutdown"),
+        ]),
+    ]),
 ]
 
 # Penandatangan di bawah form QC (sesuai Excel): (judul kolom, nama, jabatan). Tanda tangan dibiarkan kosong untuk ditandatangani basah.
@@ -383,7 +493,7 @@ def staff_label(ini):
 
 
 DEFAULT_CFG = {
-    "rooms": [dict(nama=n, tekanan=False, t_lo=SUHU_NORMAL[0], t_hi=SUHU_NORMAL[1], h_lo=HUM_NORMAL[0], h_hi=HUM_NORMAL[1]) for n in _ROOMS],
+    "rooms": [_default_room(n) for n in _ROOMS],
     "staff": ["JK", "RN", "ND", "BA", "DT", "WN", "NA", "SS", "PR", "AR", "AG", "SN", "PP", "RK", "LD", "RR", "FH", "HR", "VR", "AL", "WF", "EK"],   # petugas Radiologi yang bertugas (ubah lewat sidebar Author)
     "devices": _DEVICES,
 }
@@ -612,8 +722,15 @@ def load_cfg():
     for k in ("rooms", "staff", "devices", "base_url"):
         if c.get(k):
             cfg[k] = c[k]
+    # Ruang / peralatan yang baru ditambahkan di kode otomatis ikut muncul walau config lama sudah tersimpan di database.
+    have = {r["nama"] for r in cfg["rooms"]}
+    cfg["rooms"] += [r for r in DEFAULT_CFG["rooms"] if r["nama"] not in have]
+    have_d = {d["nama"] for d in cfg["devices"]}
+    cfg["devices"] = list(cfg["devices"]) + [json.loads(json.dumps(d)) for d in _DEVICES if d["nama"] not in have_d]
     for r in cfg["rooms"]:   # batas suhu normal sama untuk semua ruangan (menimpa nilai lama yang mungkin tersimpan)
         r["t_lo"], r["t_hi"] = SUHU_NORMAL
+        if not r.get("staff") and r["nama"] in ROOM_STAFF:
+            r["staff"] = list(ROOM_STAFF[r["nama"]])
     return cfg
 
 
@@ -632,6 +749,14 @@ def rooms():
 
 def room_names():
     return [r["nama"] for r in rooms()]
+
+
+def staff_for(ruang):
+    """Daftar inisial staff untuk satu ruang: daftar khusus ruang bila ada, kalau tidak daftar umum."""
+    for r in rooms():
+        if r["nama"] == ruang and r.get("staff"):
+            return list(r["staff"])
+    return load_cfg()["staff"]
 
 
 def room_std(name):
@@ -2212,7 +2337,7 @@ def page_ruang():
                 "<span style='font-size:12px;color:#556'>{}, {} {} {} &middot; {} WIB</span><br><span style='font-size:12px'>Sudah diisi hari ini: {}</span>{}</div>".format(
                     escape(ruang), HARI[tgl.weekday()], tgl.day, BLN[tgl.month - 1], tgl.year, n.strftime("%H:%M"), badges,
                     "" if is_author() else "<br><span style='font-size:11px;color:#667'>&#128274; Terkunci ke ruangan ini. Untuk ruangan lain, scan QR code ruangan tersebut.</span>"), unsafe_allow_html=True)
-    petugas = st.selectbox("Nama staff (inisial) *", load_cfg()["staff"], key="qr_petugas")
+    petugas = st.selectbox("Nama staff (inisial) *", staff_for(ruang), key="qr_petugas_" + ruang)
     st.markdown("### 1. Suhu & Kelembapan")
     sk = shift_now()
     shift_key = st.radio("Jam pemantauan", list(SHIFT_LABEL.keys()), index=list("PSM").index(sk), format_func=lambda k: SHIFT_LABEL[k],
@@ -2241,7 +2366,7 @@ def backdate_th():
         c1, c2 = st.columns(2)
         tgl = c1.date_input("Tanggal backdate *", value=YESTERDAY(), max_value=YESTERDAY(), key="in_tgl")
         shift_key = c2.radio("Jam pemantauan *", list(SHIFT_LABEL.keys()), format_func=lambda k: SHIFT_LABEL[k], horizontal=True, key="in_shift")
-        petugas = st.selectbox("Nama staff (inisial) *", cfg["staff"], key="in_petugas")
+        petugas = st.selectbox("Nama staff (inisial) *", staff_for(ruang), key="in_petugas")
         th_entry_form(ruang, tgl, shift_key, petugas, "in")
     with right:
         st.markdown("<div class='box'><b>Panduan pengisian</b><br>Menu ini <b>hanya untuk backdate</b> (tanggal sebelum hari ini). Pengisian real-time dilakukan lewat <b>scan QR code di ruangan</b>.<br><br>"
@@ -2274,7 +2399,7 @@ def backdate_qc():
         dev = dev_by_name(alat)
         c1, c2 = st.columns(2)
         tgl = c1.date_input("Tanggal backdate *", value=YESTERDAY(), max_value=YESTERDAY(), key="qi_tgl")
-        petugas = c2.selectbox("Nama staff (inisial) *", cfg["staff"], key="qi_petugas")
+        petugas = c2.selectbox("Nama staff (inisial) *", staff_for(dev.get("ruang") or dev.get("qr_ruang") or ""), key="qi_petugas")
         st.caption(" · ".join("{}: {}".format(a, b) for a, b in dev["info"][:3]))
         qc_checklist_ui(dev, tgl, petugas, "qi")
     with right:
@@ -2438,6 +2563,19 @@ with st.sidebar:
                 cfg["staff"] = [x.strip().upper() for x in stf.split(",") if x.strip()] or cfg["staff"]
                 if try_save_cfg(cfg):
                     st.success("Staff disimpan.")
+            rs_room = st.selectbox("Staff khusus untuk ruang", room_names(), key="cfg_rs_room")
+            cur = next((r.get("staff") or [] for r in cfg["rooms"] if r["nama"] == rs_room), [])
+            rs_txt = st.text_input("Inisial staff ruang ini (pisahkan koma; kosong = pakai daftar umum)", value=",".join(cur), key="cfg_rs_txt_" + rs_room)
+            if st.button("Simpan staff ruang", key="cfg_rs_btn"):
+                for r in cfg["rooms"]:
+                    if r["nama"] == rs_room:
+                        lst = [x.strip().upper() for x in rs_txt.split(",") if x.strip()]
+                        if lst:
+                            r["staff"] = lst
+                        else:
+                            r.pop("staff", None)
+                if try_save_cfg(cfg):
+                    st.success("Staff ruang disimpan.")
         with st.expander("Backup & restore data"):
             if db_on():
                 st.caption("Data tersimpan permanen di Supabase. Backup CSV tetap berguna sebagai salinan tambahan (mis. akhir bulan).")
