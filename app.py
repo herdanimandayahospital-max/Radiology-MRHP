@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Pemantapan Mutu Internal (PMI) by Radiology Departmen MRHP - Mandaya Royal Hospital Puri
+Pemantapan Mutu Internal (PMI) by Radiology Department MRHP
   1) Form Digital Monitoring Suhu dan Kelembapan   (grafik titik SUHU & KELEMBAPAN per ruangan, 3 shift P/S/M)
   2) Form Digital Daily Quality Control            (daftar periksa harian per modalitas: KEGIATAN + PARAMETER)
 """
