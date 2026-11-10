@@ -55,9 +55,28 @@ DATA_DIR = "data_mandaya"
 ENTRY_FILE = os.path.join(DATA_DIR, "entries.csv")
 QC_FILE = os.path.join(DATA_DIR, "qc_entries.csv")
 CFG_FILE = os.path.join(DATA_DIR, "config.json")
-LOGO_FILE = "Mandaya Logo.png"
-FONT_REG = "Lexend-Regular.ttf"
-FONT_BOLD = "Lexend-Bold.ttf"
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def _find_file(name):
+    """Cari file aset di folder app.py, folder kerja, dan subfolder static/ (nama file tidak peka huruf besar/kecil)."""
+    for d in (APP_DIR, os.getcwd(), os.path.join(APP_DIR, "static"), os.path.join(os.getcwd(), "static")):
+        p = os.path.join(d, name)
+        if os.path.exists(p):
+            return p
+        try:
+            for f in os.listdir(d):
+                if f.lower() == name.lower():
+                    return os.path.join(d, f)
+        except Exception:
+            pass
+    return os.path.join(APP_DIR, name)
+
+
+LOGO_FILE = _find_file("Mandaya Logo.png")
+LOGO_WHITE_FILE = _find_file("Mandaya Logo White.png")   # versi putih untuk header biru (tanpa kapsul putih)
+FONT_REG = _find_file("Lexend-Regular.ttf")
+FONT_BOLD = _find_file("Lexend-Bold.ttf")
 os.makedirs(DATA_DIR, exist_ok=True)
 
 FONT_URLS = {
@@ -349,7 +368,7 @@ _DEVICES = [
 ]
 
 # Penandatangan di bawah form QC (sesuai Excel): (judul kolom, nama, jabatan). Tanda tangan dibiarkan kosong untuk ditandatangani basah.
-SIGNERS = [("Disiapkan Oleh", "Herdani Rahman, S.Si", "Fisikawan Medik"),
+SIGNERS = [("Disiapkan Oleh", "Herdani Rahman, S.Si", "Fisikawan Medis"),
            ("Mengetahui", "Joko Harjanto S.Tr.Rad", "Koordinator Radiologi"),
            ("Mengetahui", "dr Christopher Silman Sp.Rad, Ph.D", "Ho. Dept Radiologi")]
 
@@ -1556,6 +1575,11 @@ button, input, textarea, select, code, pre, kbd, label, p, li, td, th, h1, h2, h
 .logo-chip{display:inline-flex;align-items:center;background:#ffffff;border-radius:14px;padding:8px 16px;box-shadow:0 4px 14px rgba(0,0,0,.14)}
 .logo-chip img{height:48px;width:auto;display:block}
 .logo-chip.sm{padding:5px 10px;border-radius:10px}.logo-chip.sm img{height:30px}
+.logo-seam{display:inline-flex;align-items:center}.logo-seam img{height:58px;width:auto;display:block;filter:drop-shadow(0 2px 6px rgba(0,0,0,.18))}
+.logo-seam.sm img{height:38px}
+.trend{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px 8px;box-shadow:var(--shadow);margin:6px 0 14px}
+.trend .tt{font-weight:700;color:var(--navy);font-size:14px;margin-bottom:2px}.trend .ts{font-size:11px;color:var(--muted);margin-bottom:4px}
+.trend svg{width:100%;height:auto;display:block}
 .hero{position:relative;overflow:hidden;background:#19558c;border-radius:22px;padding:22px 34px 28px;margin-bottom:22px;text-align:center;box-shadow:var(--shadow);animation:fadeUp .6s ease both}
 .hero .blob{position:absolute;border-radius:50%;filter:blur(46px);opacity:.18;pointer-events:none;background:#ffffff}
 .hero .b1{width:240px;height:240px;left:-70px;top:-100px;animation:blob 9s ease-in-out infinite}
@@ -1702,13 +1726,15 @@ button[data-baseweb="tab"]:focus, button[data-baseweb="tab"]:active, button[data
 
 
 @st.cache_data(show_spinner=False)
-def _logo_uri():
-    b = _logo_b64()
+def _logo_uri(path=None):
+    b = _logo_b64(path or LOGO_FILE)
     return ("data:image/png;base64," + b) if b else ""
 
 
 def _brand_html(small=False):
     """Logo Mandaya di kapsul putih (logo berwarna biru tua, jadi perlu latar putih di atas header biru)."""
+    if os.path.exists(LOGO_WHITE_FILE):   # logo putih langsung di atas latar biru (seamless)
+        return "<div class='logo-seam{}'><img src='{}' alt='{}'></div>".format(" sm" if small else "", _logo_uri(LOGO_WHITE_FILE), escape(HOSPITAL))
     uri = _logo_uri()
     if uri:
         return "<div class='logo-chip{}'><img src='{}' alt='{}'></div>".format(" sm" if small else "", uri, escape(HOSPITAL))
@@ -1789,6 +1815,50 @@ def author_box():
 # =====================================================================
 # 7. HALAMAN
 # =====================================================================
+def _trend_card(title, sub, pts, n, lo=None, hi=None, unit="", y0=None, y1=None, dec=1):
+    """Grafik tren harian (SVG). pts = {tanggal: (rata-rata, min, maks)}. Pita hijau = batas normal; titik merah = rata-rata di luar batas."""
+    if not pts:
+        return ""
+    W_, H_, L_, R_, T_, B_ = 720, 240, 46, 16, 14, 30
+    vals = [v for t in pts.values() for v in t] + [x for x in (lo, hi) if x is not None]
+    a, b = (min(vals), max(vals)) if y0 is None else (y0, y1)
+    if y0 is None:
+        pad = max((b - a) * 0.12, 1.0)
+        a, b = a - pad, b + pad
+        rng = b - a
+        step = 1 if rng <= 8 else 2 if rng <= 16 else 5 if rng <= 40 else 10
+        a, b = math.floor(a / step) * step, math.ceil(b / step) * step
+    else:
+        step = 25
+    X = lambda d: L_ + ((d - 1) / max(n - 1, 1)) * (W_ - L_ - R_)
+    Y = lambda v: T_ + (b - v) / (b - a) * (H_ - T_ - B_)
+    o = ["<svg viewBox='0 0 {} {}' xmlns='http://www.w3.org/2000/svg'>".format(W_, H_)]
+    if lo is not None and hi is not None:
+        o.append("<rect x='{}' y='{:.1f}' width='{}' height='{:.1f}' fill='#2e9e5b' opacity='.13' rx='4'/>".format(L_, Y(hi), W_ - L_ - R_, Y(lo) - Y(hi)))
+        o.append("<text x='{}' y='{:.1f}' font-size='9' fill='#2e9e5b' text-anchor='end'>normal {:g}&#8211;{:g}{}</text>".format(W_ - R_ - 4, Y(hi) + 11, lo, hi, unit))
+    v = a
+    while v <= b + 1e-9:
+        o.append("<line x1='{}' x2='{}' y1='{:.1f}' y2='{:.1f}' stroke='#e3ecf5' stroke-width='1'/>".format(L_, W_ - R_, Y(v), Y(v)))
+        o.append("<text x='{}' y='{:.1f}' font-size='9' fill='#5c7691' text-anchor='end'>{:.{dec}f}</text>".format(L_ - 6, Y(v) + 3, v, dec=0 if step >= 1 else dec))
+        v += step
+    for d in range(1, n + 1):
+        if n <= 16 or d % 2 == 1 or d == n:
+            o.append("<text x='{:.1f}' y='{}' font-size='9' fill='#5c7691' text-anchor='middle'>{}</text>".format(X(d), H_ - 10, d))
+    ds = sorted(pts)
+    for d in ds:
+        m_, mn, mx = pts[d]
+        if mx - mn > 1e-9:
+            o.append("<line x1='{x:.1f}' x2='{x:.1f}' y1='{:.1f}' y2='{:.1f}' stroke='#9db8d6' stroke-width='6' stroke-linecap='round' opacity='.55'/>".format(Y(mx), Y(mn), x=X(d)))
+    o.append("<polyline fill='none' stroke='#19558c' stroke-width='2.4' stroke-linejoin='round' points='{}'/>".format(" ".join("{:.1f},{:.1f}".format(X(d), Y(pts[d][0])) for d in ds)))
+    for d in ds:
+        m_, mn, mx = pts[d]
+        bad = lo is not None and hi is not None and (m_ < lo or m_ > hi)
+        o.append("<circle cx='{:.1f}' cy='{:.1f}' r='4' fill='{}' stroke='#fff' stroke-width='1.5'><title>Tgl {}: rata-rata {:.{dec}f}{} (min {:.{dec}f} - maks {:.{dec}f})</title></circle>".format(
+            X(d), Y(m_), "#d64545" if bad else "#19558c", d, m_, unit, mn, mx, dec=dec))
+    o.append("</svg>")
+    return "<div class='trend'><div class='tt'>{}</div><div class='ts'>{}</div>{}</div>".format(escape(title), escape(sub), "".join(o))
+
+
 def dash_th():
     st.caption("Rangkuman pencapaian pemeriksaan suhu & kelembapan (3x sehari: {})".format(SHIFT_TIMES))
     ruang, m, y = filter_bar("db", room_names(), "Ruangan")
@@ -1825,20 +1895,18 @@ def dash_th():
                 "<span><i class='s-empty'></i>Belum diisi</span></div>".format(lo=std["t_lo"], hi=std["t_hi"]), unsafe_allow_html=True)
 
     data = month_data(ruang, y, m)
-    if data:
-        per_day = {}
-        for (d, _s), e in data.items():
-            per_day.setdefault(d, []).append(e)
-        dfc = pd.DataFrame({"Tanggal": sorted(per_day),
-                            "Suhu rata-rata (°C)": [sum(x["suhu"] for x in per_day[d]) / len(per_day[d]) for d in sorted(per_day)],
-                            "Kelembapan rata-rata (%)": [sum(x["hum"] for x in per_day[d]) / len(per_day[d]) for d in sorted(per_day)]}).set_index("Tanggal")
+    per_day = {}
+    for (d, _s), e in data.items():
+        per_day.setdefault(d, []).append(e)
+    if per_day:
+        st.markdown("#### Tren harian - {} {}".format(BLN[m - 1], y))
         g1, g2 = st.columns(2)
-        g1.markdown("**Tren suhu harian (rata-rata)**")
-        g1.line_chart(dfc[["Suhu rata-rata (°C)"]])
-        g2.markdown("**Tren kelembapan harian (rata-rata)**")
-        g2.line_chart(dfc[["Kelembapan rata-rata (%)"]])
+        pt = {d: (sum(x["suhu"] for x in v) / len(v), min(x["suhu"] for x in v), max(x["suhu"] for x in v)) for d, v in per_day.items()}
+        ph = {d: (sum(x["hum"] for x in v) / len(v), min(x["hum"] for x in v), max(x["hum"] for x in v)) for d, v in per_day.items()}
+        g1.markdown(_trend_card("Tren suhu harian", "Garis = rata-rata per hari, batang = rentang min-maks (P/S/M)", pt, an["n"], std["t_lo"], std["t_hi"], " °C", dec=1), unsafe_allow_html=True)
+        g2.markdown(_trend_card("Tren kelembapan harian", "Garis = rata-rata per hari, batang = rentang min-maks (P/S/M)", ph, an["n"], std["h_lo"], std["h_hi"], " %", dec=0), unsafe_allow_html=True)
 
-    c1, c2, c3 = st.columns(3)
+    c1, c3 = st.columns(2)
     with c1:
         st.markdown("**Suhu di atas batas**")
         st.dataframe(pd.DataFrame([dict(Tanggal=d, Shift=SHIFT_NAME[s], **{"Suhu (°C)": v, "Batas atas": std["t_hi"], "Selisih": round(v - std["t_hi"], 1)}) for d, s, v in an["high"]]
@@ -1846,10 +1914,6 @@ def dash_th():
         if an["low"]:
             st.markdown("**Suhu di bawah batas**")
             st.dataframe(pd.DataFrame([dict(Tanggal=d, Shift=SHIFT_NAME[s], **{"Suhu (°C)": v, "Batas bawah": std["t_lo"], "Selisih": round(v - std["t_lo"], 1)}) for d, s, v in an["low"]]), hide_index=True)
-    with c2:
-        st.markdown("**Riwayat pengisian**")
-        st.dataframe(pd.DataFrame([dict(Tanggal=d, **{"Shift belum diisi": ", ".join(SHIFT_NAME[x] for x in v), "Status": "Belum diisi" if len(v) == 3 else "Sebagian"}) for d, v in sorted(an["empty_by_day"].items())]
-                                  or [dict(Tanggal="-", **{"Shift belum diisi": "Semua terisi", "Status": "-"})]), hide_index=True)
     with c3:
         st.markdown("**Kelembapan di luar batas ({:g}–{:g} %)**".format(std["h_lo"], std["h_hi"]))
         st.dataframe(pd.DataFrame([dict(Tanggal=d, Shift=SHIFT_NAME[s], **{"Kelembapan (%)": v, "Keterangan": "Di atas" if k == "high" else "Di bawah"}) for d, s, v, k in an["hum_bad"]]
@@ -1889,6 +1953,15 @@ def dash_qc():
                 unsafe_allow_html=True)
 
     n = calendar.monthrange(y, m)[1]
+    qpts = {}
+    for d in range(1, n + 1):
+        done = sum(a["days"][d]["done"] for a in ans.values() if a["days"][d]["state"] != "future")
+        tot = sum(a["days"][d]["total"] for a in ans.values() if a["days"][d]["state"] != "future")
+        if tot:
+            qpts[d] = (done / tot * 100,) * 3
+    if qpts:
+        st.markdown("#### Tren harian - {} {}".format(BLN[m - 1], y))
+        st.markdown(_trend_card("Tren kelengkapan Daily QC", "Persentase kegiatan harian yang terselesaikan di seluruh peralatan", qpts, n, 90, 100, " %", y0=0, y1=100, dec=0), unsafe_allow_html=True)
     head = "<tr><th></th>" + "".join("<th>{}</th>".format(d) for d in range(1, n + 1)) + "</tr>"
     body = ""
     cls = {"full": "ok", "part": "low", "empty": "empty", "future": "future"}
@@ -2254,6 +2327,10 @@ def _preview(sh, base_px=1400, scale=0.85):
 
 def page_download():
     header()
+    _r, _b = _register_lexend()
+    if not (_r and _b):
+        st.warning("File font Lexend-Regular.ttf / Lexend-Bold.ttf tidak ditemukan di folder aplikasi, sehingga PDF memakai font cadangan (Helvetica). "
+                   "Pastikan kedua file itu ada di root repo GitHub (sejajar dengan app.py) lalu reboot aplikasi.")
     names = ["🌡️ Form Suhu & Kelembapan", "🛠️ Form Daily QC"]
     if is_author():   # generator QR hanya untuk author
         names.append("🔳 QR Code Ruangan")
