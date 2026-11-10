@@ -31,7 +31,7 @@ except Exception:
     pass
 
 st.set_page_config(
-    page_title="Pemantapan Mutu Internal (PMI) by Radiology Departmen MRHP",
+    page_title="Pemantapan Mutu Internal (PMI) by Radiology Department MRHP",
     page_icon="🏥",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -42,7 +42,7 @@ st.set_page_config(
 # 0. KONFIGURASI UTAMA (aman diubah)
 # =====================================================================
 APP_TITLE = "Pemantapan Mutu Internal (PMI)"
-APP_BY = "by Radiology Departmen MRHP"
+APP_BY = "by Radiology Department MRHP"
 HOSPITAL = "Mandaya Royal Hospital Puri"
 SITE = "PURI"
 DEPT_LINE = "DEPARTEMEN RADIOLOGI MANDAYA ROYAL HOSPITAL PURI"
