@@ -1874,7 +1874,7 @@ def header(compact=False):
             wm, escape(APP_TITLE), escape(APP_BY)), unsafe_allow_html=True)
         return
     st.markdown("<div class='hero'><span class='blob b1'></span><span class='blob b2'></span><div class='top'>{}<div class='hfy'>Departemen Radiologi</div></div>"
-                "<div class='ttl'>{}</div><div class='sub'>{} &middot; Monitoring Suhu &amp; Kelembapan &middot; Daily Quality Control</div>"
+                "<div class='ttl'>{}</div><div class='sub'>{}<br>Monitoring Suhu &amp; Kelembapan &middot; Daily Quality Control</div>"
                 "<div class='code'>{}</div></div>".format(wm, escape(APP_TITLE), escape(APP_BY), escape(HOSPITAL)), unsafe_allow_html=True)
 
 
