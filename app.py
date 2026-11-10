@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Pemantapan Mutu Internal (PMI) by Radiology Department MRHP
+Pemantapan Mutu Internal (PMI) by Radiology Departmen MRHP - Mandaya Royal Hospital Puri
   1) Form Digital Monitoring Suhu dan Kelembapan   (grafik titik SUHU & KELEMBAPAN per ruangan, 3 shift P/S/M)
   2) Form Digital Daily Quality Control            (daftar periksa harian per modalitas: KEGIATAN + PARAMETER)
 """
@@ -31,10 +31,10 @@ except Exception:
     pass
 
 st.set_page_config(
-    page_title="Pemantapan Mutu Internal (PMI) by Radiology Department MRHP",
+    page_title="Pemantapan Mutu Internal (PMI) by Radiology Departmen MRHP",
     page_icon="🏥",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
     menu_items={"Get help": None, "Report a bug": None, "About": None},
 )
 
@@ -42,7 +42,7 @@ st.set_page_config(
 # 0. KONFIGURASI UTAMA (aman diubah)
 # =====================================================================
 APP_TITLE = "Pemantapan Mutu Internal (PMI)"
-APP_BY = "by Radiology Department MRHP"
+APP_BY = "by Radiology Departmen MRHP"
 HOSPITAL = "Mandaya Royal Hospital Puri"
 SITE = "PURI"
 DEPT_LINE = "DEPARTEMEN RADIOLOGI MANDAYA ROYAL HOSPITAL PURI"
@@ -1845,6 +1845,35 @@ button[data-baseweb="tab"]:focus, button[data-baseweb="tab"]:active, button[data
 
 [data-testid="stDataFrame"]{border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
 [data-testid="stAlert"]{border-radius:14px}
+/* ---------- HP / layar sempit ---------- */
+@media (max-width: 768px){
+  .block-container{padding:.9rem .8rem 3.5rem !important}
+  .hero{padding:16px 14px 20px;border-radius:16px;margin-bottom:14px}
+  .hero .top{flex-direction:column;align-items:center;gap:6px;margin-bottom:8px}
+  .hero .hfy{font-size:15px}
+  .hero .ttl{font-size:21px}
+  .hero .sub{letter-spacing:.4px}
+  .logo-seam img{height:46px}
+  .hero-c{padding:10px 12px;gap:10px}
+  /* huruf 16px mencegah iPhone memperbesar layar otomatis saat mengetik */
+  input, textarea, [data-baseweb="select"] div, [data-baseweb="input"] input{font-size:16px !important}
+  /* area sentuh minimal ~48px */
+  [data-testid="stButton"] button, [data-testid="stDownloadButton"] button, [data-testid="stFormSubmitButton"] button{min-height:48px;width:100%;font-size:15px;border-radius:12px}
+  [data-testid="stCheckbox"] label{min-height:46px;align-items:center;padding:4px 2px}
+  [data-testid="stCheckbox"] label p{font-size:14.5px;line-height:1.35}
+  [data-testid="stRadio"] [role="radiogroup"]{flex-wrap:wrap;gap:6px 16px}
+  [data-testid="stRadio"] label{min-height:42px;align-items:center}
+  [data-testid="stTabs"] [role="tablist"]{overflow-x:auto;gap:2px}
+  [data-testid="stTabs"] button{padding:8px 10px;font-size:13px;white-space:nowrap}
+  [data-testid="stExpander"] summary{min-height:48px}
+  .kp{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .kc{padding:12px 12px}.kc .t{font-size:11px}.kc .v{font-size:26px}.kc .s{font-size:10.5px}
+  .kc:hover{transform:none}
+  .trend{padding:12px 10px 6px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .trend svg{min-width:600px}
+  .box{padding:14px !important}
+  h2,h3,h4{font-size:1.1rem !important}
+}
 @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
 </style>
 """, unsafe_allow_html=True)
@@ -1874,7 +1903,7 @@ def header(compact=False):
             wm, escape(APP_TITLE), escape(APP_BY)), unsafe_allow_html=True)
         return
     st.markdown("<div class='hero'><span class='blob b1'></span><span class='blob b2'></span><div class='top'>{}<div class='hfy'>Departemen Radiologi</div></div>"
-                "<div class='ttl'>{}</div><div class='sub'>{}<br>Monitoring Suhu &amp; Kelembapan &middot; Daily Quality Control</div>"
+                "<div class='ttl'>{}</div><div class='sub'>{} &middot; Monitoring Suhu &amp; Kelembapan &middot; Daily Quality Control</div>"
                 "<div class='code'>{}</div></div>".format(wm, escape(APP_TITLE), escape(APP_BY), escape(HOSPITAL)), unsafe_allow_html=True)
 
 
@@ -1944,7 +1973,7 @@ def _trend_card(title, sub, pts, n, lo=None, hi=None, unit="", y0=None, y1=None,
     """Grafik tren harian (SVG). pts = {tanggal: (rata-rata, min, maks)}. Pita hijau = batas normal; titik merah = rata-rata di luar batas."""
     if not pts:
         return ""
-    W_, H_, L_, R_, T_, B_ = 720, 240, 46, 16, 14, 30
+    W_, H_, L_, R_, T_, B_ = 720, 250, 50, 16, 14, 34
     vals = [v for t in pts.values() for v in t] + [x for x in (lo, hi) if x is not None]
     a, b = (min(vals), max(vals)) if y0 is None else (y0, y1)
     if y0 is None:
@@ -1960,15 +1989,15 @@ def _trend_card(title, sub, pts, n, lo=None, hi=None, unit="", y0=None, y1=None,
     o = ["<svg viewBox='0 0 {} {}' xmlns='http://www.w3.org/2000/svg'>".format(W_, H_)]
     if lo is not None and hi is not None:
         o.append("<rect x='{}' y='{:.1f}' width='{}' height='{:.1f}' fill='#2e9e5b' opacity='.13' rx='4'/>".format(L_, Y(hi), W_ - L_ - R_, Y(lo) - Y(hi)))
-        o.append("<text x='{}' y='{:.1f}' font-size='9' fill='#2e9e5b' text-anchor='end'>normal {:g}&#8211;{:g}{}</text>".format(W_ - R_ - 4, Y(hi) + 11, lo, hi, unit))
+        o.append("<text x='{}' y='{:.1f}' font-size='12' fill='#2e9e5b' text-anchor='end'>normal {:g}&#8211;{:g}{}</text>".format(W_ - R_ - 4, Y(hi) + 11, lo, hi, unit))
     v = a
     while v <= b + 1e-9:
         o.append("<line x1='{}' x2='{}' y1='{:.1f}' y2='{:.1f}' stroke='#e3ecf5' stroke-width='1'/>".format(L_, W_ - R_, Y(v), Y(v)))
-        o.append("<text x='{}' y='{:.1f}' font-size='9' fill='#5c7691' text-anchor='end'>{:.{dec}f}</text>".format(L_ - 6, Y(v) + 3, v, dec=0 if step >= 1 else dec))
+        o.append("<text x='{}' y='{:.1f}' font-size='12' fill='#5c7691' text-anchor='end'>{:.{dec}f}</text>".format(L_ - 6, Y(v) + 3, v, dec=0 if step >= 1 else dec))
         v += step
     for d in range(1, n + 1):
         if n <= 16 or d % 2 == 1 or d == n:
-            o.append("<text x='{:.1f}' y='{}' font-size='9' fill='#5c7691' text-anchor='middle'>{}</text>".format(X(d), H_ - 10, d))
+            o.append("<text x='{:.1f}' y='{}' font-size='12' fill='#5c7691' text-anchor='middle'>{}</text>".format(X(d), H_ - 12, d))
     ds = sorted(pts)
     for d in ds:
         m_, mn, mx = pts[d]
@@ -1978,7 +2007,7 @@ def _trend_card(title, sub, pts, n, lo=None, hi=None, unit="", y0=None, y1=None,
     for d in ds:
         m_, mn, mx = pts[d]
         bad = lo is not None and hi is not None and (m_ < lo or m_ > hi)
-        o.append("<circle cx='{:.1f}' cy='{:.1f}' r='4' fill='{}' stroke='#fff' stroke-width='1.5'><title>Tgl {}: rata-rata {:.{dec}f}{} (min {:.{dec}f} - maks {:.{dec}f})</title></circle>".format(
+        o.append("<circle cx='{:.1f}' cy='{:.1f}' r='5' fill='{}' stroke='#fff' stroke-width='1.5'><title>Tgl {}: rata-rata {:.{dec}f}{} (min {:.{dec}f} - maks {:.{dec}f})</title></circle>".format(
             X(d), Y(m_), "#d64545" if bad else "#19558c", d, m_, unit, mn, mx, dec=dec))
     o.append("</svg>")
     return "<div class='trend'><div class='tt'>{}</div><div class='ts'>{}</div>{}</div>".format(escape(title), escape(sub), "".join(o))
@@ -2444,6 +2473,7 @@ def page_backdate():
 
 
 def _preview(sh, base_px=1400, scale=0.85):
+    st.caption("Pratinjau berukuran kertas A4 landscape: di HP geser/cubit untuk memperbesar, atau unduh PDF untuk dibuka di HP.")
     """Preview formulir dengan ukuran tetap (85%)."""
     wpx = int(base_px * scale)
     components.html("<div style='overflow:auto;background:#fff;border:1px solid #d5dbe3'>{}</div>".format(sheet_to_svg(sh, wpx)),
